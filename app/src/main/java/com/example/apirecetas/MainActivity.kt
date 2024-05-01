@@ -45,26 +45,6 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener,
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-
-  /* private fun searchByRecipe(query:String){
-        CoroutineScope(Dispatchers.IO).launch {
-            val call: Call<RecipeResponse> = getRetrofit()
-                .create(APIService::class.java)
-                .getRecipes(apiKey, query)
-            val response: Response<RecipeResponse> = call.execute()
-            runOnUiThread{
-                if (response.isSuccessful){
-                    val recipeResponse:RecipeResponse? = response.body()
-                    recipeList.clear()
-                    recipeList.addAll(recipeResponse?.results ?: emptyList())
-                    adapter.notifyDataSetChanged()
-                }
-                else{
-                    showError()
-                }
-            }
-        }
-    }*/
    private fun searchByRecipe(query: String, offset: Int = 0) {
     // Si es el inicio de una nueva búsqueda, limpia la lista
     if (offset == 0) {
@@ -93,9 +73,6 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener,
         }
     }
 }
-
-
-
     private fun showError(){
         Toast.makeText(this, "ERROR", Toast.LENGTH_SHORT).show()
     }

@@ -9,8 +9,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.apirecetas.databinding.RecipeDetailBinding
 import com.squareup.picasso.Picasso
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -22,6 +20,7 @@ class RecipeDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: RecipeDetailBinding
     private val apiKey = "2e28a33af7fc472fb3f6f07c1e811136"
+    private val dao by lazy { AppDatabase.getDatabase(this).favoriteRecipeDao() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,10 +35,17 @@ class RecipeDetailActivity : AppCompatActivity() {
                     bindRecipeDetails(it)
                 }
             }
+            val favoriteRecipe = dao.getRecipeById(recipeId)
+            if (favoriteRecipe != null) {
+                // La receta ya está en favoritos
+                binding.btnHeart.setImageResource(R.drawable.ic_heart_fill)
+            } else {
+                // La receta no está en favoritos
+                binding.btnHeart.setImageResource(R.drawable.ic_heart_empty)
+            }
         }
         binding.btnBack.setOnClickListener{finish()}
     }
-
 
     private fun getRetrofit(): Retrofit {
         return Retrofit.Builder().baseUrl("https://api.spoonacular.com/")
@@ -56,12 +62,12 @@ class RecipeDetailActivity : AppCompatActivity() {
         call.enqueue(object : Callback<RecipeDetail> {
             override fun onResponse(call: Call<RecipeDetail>, response: Response<RecipeDetail>) {
                 val recipe = if (response.isSuccessful) response.body() else null
-                CoroutineScope(Dispatchers.Main).launch {
+                lifecycleScope.launch {
                     onResult(recipe)
                 }
             }
             override fun onFailure(call: Call<RecipeDetail>, t: Throwable) {
-                CoroutineScope(Dispatchers.Main).launch {
+                lifecycleScope.launch {
                     onResult(null)
                 }
             }
@@ -69,7 +75,7 @@ class RecipeDetailActivity : AppCompatActivity() {
     }
 
     private fun bindRecipeDetails(recipe: RecipeDetail) {
-    Log.d("RecipeDetailActivity", "Binding recipe details: $recipe")
+        Log.d("RecipeDetailActivity", "Binding recipe details: $recipe")
 
         binding.tvTitle.text = recipe.title
         Picasso.get().load(recipe.image).transform(RoundedCornersTransformation(30, 0)).into(binding.ivRecipe)
@@ -85,6 +91,20 @@ class RecipeDetailActivity : AppCompatActivity() {
 
         binding.tvSummary.text = recipe.instructions
 
+        binding.btnHeart.setOnClickListener {
+            lifecycleScope.launch {
+                val favoriteRecipe = dao.getRecipeById(recipe.id)
+                if (favoriteRecipe != null) {
+                    // Si la receta ya está en favoritos, la eliminamos
+                    dao.delete(favoriteRecipe)
+                    binding.btnHeart.setImageResource(R.drawable.ic_heart_empty)
+                } else {
+                    // Si la receta no está en favoritos, la agregamos
+                    val newFavoriteRecipe = FavoriteRecipe(recipe.id, recipe.title, recipe.image)
+                    dao.insert(newFavoriteRecipe)
+                    binding.btnHeart.setImageResource(R.drawable.ic_heart_fill)
+                }
+            }
+        }
     }
-
 }

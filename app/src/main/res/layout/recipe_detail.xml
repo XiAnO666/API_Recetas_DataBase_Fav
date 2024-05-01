@@ -1,16 +1,18 @@
-<ScrollView
+<FrameLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
-        <!-- Tu contenido actual -->
 
         <TextView
             android:id="@+id/tvTitle"
@@ -68,6 +70,14 @@
             tools:text="Summary" />
 
         <Button
+            android:id="@+id/btnAddToFavorites"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:fontFamily="@font/short_stack"
+            android:text="Add to Favorites" />
+
+        <Button
             android:id="@+id/btnLink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -83,7 +93,18 @@
             android:fontFamily="@font/short_stack"
             android:text="Return to recipe list"
             android:textSize="30sp"
-            app:rippleColor="#E91E63"></Button>
+            app:rippleColor="#E91E63"/>
 
-    </LinearLayout>
-</ScrollView>
+        </LinearLayout>
+    </ScrollView>
+
+    <ImageButton
+        android:id="@+id/btnHeart"
+        android:layout_width="58dp"
+        android:layout_height="50dp"
+        android:layout_gravity="end|top"
+        android:layout_margin="16dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ic_heart_empty" />
+
+</FrameLayout>
