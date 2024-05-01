@@ -1,22 +1,52 @@
 package com.example.apirecetas
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import android.content.ContentValues
+import android.content.Context
+class FavoriteRecipeDAO(context: Context) {
 
-@Dao
-interface FavoriteRecipeDAO {
-    @Query("SELECT * FROM favorite_recipes")
-    suspend fun getAll(): List<FavoriteRecipe>
+    private val dbHelper = RecipeDBHelper(context)
 
-    @Query("SELECT * FROM favorite_recipes WHERE id = :id")
-    suspend fun getRecipeById(id: Int): FavoriteRecipe?
+    fun getAll(): List<FavoriteRecipe> {
+        val db = dbHelper.readableDatabase
+        val cursor = db.query(FavoriteRecipe.TABLE_NAME, null, null, null, null, null, null)
+        val recipes = mutableListOf<FavoriteRecipe>()
+        with(cursor) {
+            while (moveToNext()) {
+                val id = getInt(getColumnIndexOrThrow(FavoriteRecipe.COLUMN_ID))
+                val title = getString(getColumnIndexOrThrow(FavoriteRecipe.COLUMN_TITLE))
+                val image = getString(getColumnIndexOrThrow(FavoriteRecipe.COLUMN_IMAGE))
+                recipes.add(FavoriteRecipe(id, title, image))
+            }
+        }
+        return recipes
+    }
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(recipe: FavoriteRecipe)
+    fun getRecipeById(id: Int): FavoriteRecipe? {
+        val db = dbHelper.readableDatabase
+        val cursor = db.query(FavoriteRecipe.TABLE_NAME, null, "${FavoriteRecipe.COLUMN_ID} = ?", arrayOf(id.toString()), null, null, null)
+        return with(cursor) {
+            when {
+                moveToFirst() -> FavoriteRecipe(getInt(getColumnIndexOrThrow(FavoriteRecipe.COLUMN_ID)), getString(getColumnIndexOrThrow(FavoriteRecipe.COLUMN_TITLE)), getString(getColumnIndexOrThrow(FavoriteRecipe.COLUMN_IMAGE)))
+                else -> null
+            }
+        }
+    }
 
-    @Delete
-    suspend fun delete(recipe: FavoriteRecipe)
+    fun insert(recipe: FavoriteRecipe) {
+        val db = dbHelper.writableDatabase
+        val values = ContentValues().apply {
+            put(FavoriteRecipe.COLUMN_ID, recipe.id)
+            put(FavoriteRecipe.COLUMN_TITLE, recipe.title)
+            put(FavoriteRecipe.COLUMN_IMAGE, recipe.image)
+        }
+        db.insert(FavoriteRecipe.TABLE_NAME, null, values)
+    }
+
+    fun delete(recipe: FavoriteRecipe) {
+        val db = dbHelper.writableDatabase
+        val selection = "${FavoriteRecipe.COLUMN_ID} = ?"
+        val selectionArgs = arrayOf(recipe.id.toString())
+        db.delete(FavoriteRecipe.TABLE_NAME, selection, selectionArgs)
+    }
 }
+

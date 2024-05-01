@@ -20,7 +20,7 @@ class RecipeDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: RecipeDetailBinding
     private val apiKey = "2e28a33af7fc472fb3f6f07c1e811136"
-    private val dao by lazy { AppDatabase.getDatabase(this).favoriteRecipeDao() }
+    private val dao = FavoriteRecipeDAO(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,3 +108,4 @@ class RecipeDetailActivity : AppCompatActivity() {
         }
     }
 }
+

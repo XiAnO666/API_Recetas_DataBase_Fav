@@ -1,11 +1,10 @@
 package com.example.apirecetas
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
-@Entity(tableName = "favorite_recipes")
-data class FavoriteRecipe(
-    @PrimaryKey val id: Int,
-    val title: String,
-    val image: String
-)
+data class FavoriteRecipe(val id: Int, val title: String, val image: String) {
+    companion object {
+        const val TABLE_NAME = "favorite_recipes"
+        const val COLUMN_ID = "id"
+        const val COLUMN_TITLE = "title"
+        const val COLUMN_IMAGE = "image"
+    }
+}
